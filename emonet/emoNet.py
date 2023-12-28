@@ -2,7 +2,7 @@
 import torch.nn as nn
 import torch.nn.functional as F
 
- """
+"""
 class emoNet(nn.Module):
     network_config = [32, 32, 'M', 64, 64, 'M', 128, 128, 'M']
  
@@ -42,7 +42,7 @@ import torch.nn.functional as F
 class emoNet(nn.Module):
     network_config = [64, 64, 'M', 64, 64, 'M', 128, 128, 'M']
 
-    def __init__(self, num_of_channels, num_labels):
+    def __init__(self, num_of_channels, num_of_classes):
         super(emoNet, self).__init__()
         self.features = self._make_layers(num_of_channels, self.network_config)
         self.classifier = nn.Sequential(
@@ -52,7 +52,7 @@ class emoNet(nn.Module):
             nn.Linear(1024, 1024),
             nn.ELU(True),
             nn.Dropout(p=0.5),
-            nn.Linear(1024, num_labels)
+            nn.Linear(1024, num_of_classes)
         )
 
     def forward(self, x):
