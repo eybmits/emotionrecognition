@@ -77,7 +77,7 @@ val_loader = DataLoader(val_dataset, batch_size=64, shuffle=False)
 
 # Model loading and evaluation
 model = emoNet(num_of_channels=1, num_of_classes=len(train_data.classes))
-model.load_state_dict(torch.load('/Users/markusbaumann/Documents/CS/computervision/Project/best_model.pth'))
+model.load_state_dict(torch.load('/Users/markusbaumann/emotionrecognition/output/model.pth'))
 model.eval()
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
