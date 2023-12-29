@@ -25,6 +25,7 @@ import torch
 import torch.optim as optim
 
 
+
 parser = argparse.ArgumentParser()
 parser.add_argument('-m', '--model', type=str, help='Path to save the trained model')
 parser.add_argument('-p', '--plot', type=str, help='Path to save the loss/accuracy plot')

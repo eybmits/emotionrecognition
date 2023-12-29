@@ -1,0 +1,2 @@
+filepath,anger,disgust,fear,happiness,sadness,surprise,predicted_label
+/Users/markusbaumann/emotionrecognition/imagecsv/image.png,0.0,0.0,0.0,1.0,0.0,0.0,happiness

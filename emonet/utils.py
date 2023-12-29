@@ -38,7 +38,7 @@ class EarlyStopping:
     over a certain number of iterations
     """
  
-    def __init__(self, patience=10, min_delta=0):
+    def __init__(self, patience=15, min_delta=0):
         """
         :param patience: number of epochs to wait stopping the training procedure
         :param min_delta: the minimum difference between (previous and the new loss)

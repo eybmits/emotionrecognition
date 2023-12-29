@@ -16,6 +16,6 @@ TRAIN_SIZE = 0.90
 VAL_SIZE = 0.10
  
 # specify the batch size, total number of epochs and the learning rate
-BATCH_SIZE = 64
+BATCH_SIZE = 32
 NUM_OF_EPOCHS = 1
-LR = 1e-3
+LR = 1e-4

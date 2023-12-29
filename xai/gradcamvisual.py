@@ -5,7 +5,7 @@ import numpy as np
 from torchvision import transforms
 from emonet import emoNet
 import torch.nn.functional as nnf
-from xai.gradcam import GradCAM  # Import GradCAM from the gradcam.py script
+from gradcam import GradCAM  # Import GradCAM from the gradcam.py script
 
 # Initialize the argument parser
 parser = argparse.ArgumentParser()
@@ -28,7 +28,7 @@ model.to(device)
 model.eval()
 
 # Initialize Grad-CAM
-target_layer = model.features[-4]  # Adjust according to your model
+target_layer = model.features[-1]  # Adjust according to your model
 grad_cam = GradCAM(model, target_layer)
 
 # Preprocessing transformations
