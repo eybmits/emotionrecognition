@@ -1,4 +1,6 @@
 from torchvision.transforms import RandomHorizontalFlip
+from torchvision.transforms import RandomRotation
+from torchvision.transforms import Normalize
 from torch.utils.data import WeightedRandomSampler
 from sklearn.metrics import classification_report
 from torchvision.transforms import RandomCrop
@@ -39,13 +41,17 @@ print(f"[INFO] Current training device: {device}")
 train_transform = transforms.Compose([
     Grayscale(num_output_channels=1),
     RandomHorizontalFlip(),
+    RandomRotation(10),
     RandomCrop((48, 48)),
-    ToTensor()
+    ToTensor(),
+    Normalize(mean=[0.512304961681366], std=[0.21182875335216522])
 ])
+
  
 test_transform = transforms.Compose([
     Grayscale(num_output_channels=1),
-    ToTensor()
+    ToTensor(),
+    Normalize(mean=[0.512304961681366], std=[0.21182875335216522])
 ])
  
 # load all the images within the specified folder and apply different augmentation

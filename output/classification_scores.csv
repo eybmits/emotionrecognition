@@ -1,0 +1,2 @@
+filepath,anger,disgust,fear,happiness,sadness,surprise,predicted_label
+/Users/markusbaumann/emotionrecognition/output/plot.png,0.13,0.42,0.16,0.08,0.13,0.09,disgust
