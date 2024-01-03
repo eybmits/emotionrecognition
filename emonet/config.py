@@ -12,10 +12,10 @@ TEST_DIRECTORY = os.path.join(DATASET_FOLDER, "test")
 
 
 # initialize the amount of samples to use for training and validation
-TRAIN_SIZE = 0.90
-VAL_SIZE = 0.10
+TRAIN_SIZE = 0.80
+VAL_SIZE = 0.20
  
 # specify the batch size, total number of epochs and the learning rate
 BATCH_SIZE = 32
 NUM_OF_EPOCHS = 100
-LR = 1e-4
+LR = 0.01

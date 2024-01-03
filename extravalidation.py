@@ -1,28 +1,30 @@
+# /path/to/full_script.py
 import os
 import torch
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-from PIL import Image
+from PIL import Image, ImageOps
 from torchvision import transforms, datasets
-from torch.utils.data import Dataset, DataLoader, random_split, WeightedRandomSampler
-from sklearn.metrics import classification_report
-from collections import Counter
-from datetime import datetime
+from torch.utils.data import Dataset, DataLoader
 import torch.nn as nn
-import torch.optim as optim
-import torch.nn.functional as F
 from torch.optim import SGD
-
-# Import custom modules
+from torchvision.transforms.functional import to_tensor, resize
 from emonet import config as cfg, EarlyStopping, LRScheduler, emoNet
 
-# Custom Image Dataset Definition
+# Function to normalize image saturation and brightness
+def normalize_saturation_and_brightness(image):
+    image_hsv = image.convert('HSV')
+    h, s, v = image_hsv.split()
+    s = ImageOps.autocontrast(s)
+    v = ImageOps.autocontrast(v)
+    image_normalized = Image.merge('HSV', (h, s, v)).convert('RGB')
+    return image_normalized
+
+
+# Custom Image Dataset
 class CustomImageDataset(Dataset):
     def __init__(self, img_dir, transform=None, label_mapping=None):
         self.img_dir = img_dir
         self.transform = transform
-        self.images = sorted(os.listdir(img_dir))  # Sort image filenames
+        self.images = [file for file in sorted(os.listdir(img_dir)) if file.endswith(('.png', '.jpg', '.jpeg'))]
         self.label_mapping = label_mapping
 
     def __len__(self):
@@ -30,10 +32,10 @@ class CustomImageDataset(Dataset):
 
     def __getitem__(self, idx):
         img_name = os.path.join(self.img_dir, self.images[idx])
-        image = Image.open(img_name).convert('L')
+        image = Image.open(img_name)
+        image = normalize_saturation_and_brightness(image)
         label_text = self.extract_label(self.images[idx])
         label = self.label_mapping.get(label_text, -1)
-
 
         if self.transform:
             image = self.transform(image)
@@ -44,50 +46,41 @@ class CustomImageDataset(Dataset):
     def extract_label(file_name):
         return file_name.split('_')[-1].split('.')[0]
 
-# Label mapping for the validation set
+# Label mapping and transform placeholders
 label_mapping = {
-    'anger': 0, 'disgust': 1, 'fear': 2, 
+    'anger': 0, 'disgust': 1, 'fear': 2,
     'happiness': 3, 'sadness': 4, 'surprise': 5
 }
 
-# Transformations
-train_transform = transforms.Compose([
-    transforms.Grayscale(num_output_channels=1),
-    transforms.RandomHorizontalFlip(),
-    transforms.RandomCrop((48, 48)),
-    transforms.ToTensor()
-])
+# Set directory for validation set
+directory = '/Users/markusbaumann/emotionrecognition/data/validation_set'
 
-test_transform = transforms.Compose([
-    transforms.Grayscale(num_output_channels=1),
-    transforms.ToTensor()
-])
+# Calculate mean and std for normalization
+transform_to_tensor = transforms.Compose([transforms.ToTensor()])
 
+# Define transformations with the calculated mean and std
 val_transforms = transforms.Compose([
+    transforms.Grayscale(num_output_channels=1),
     transforms.Resize((48, 48)),
     transforms.ToTensor(),
-    transforms.Normalize((0.5,), (0.5,))
+    transforms.Normalize(mean=[0.5071], std=[0.2370])
 ])
 
-# Datasets and Data Loaders
-train_data = datasets.ImageFolder(cfg.TRAIN_DIRECTORY, transform=train_transform)
-test_data = datasets.ImageFolder(cfg.TEST_DIRECTORY, transform=test_transform)
-val_dataset = CustomImageDataset(img_dir='/Users/markusbaumann/Documents/CS/computervision/Project/emotions/validation_set', transform=val_transforms, label_mapping=label_mapping)
-
+# Instantiate dataset and dataloader for validation set
+val_dataset = CustomImageDataset(img_dir=directory, transform=val_transforms, label_mapping=label_mapping)
 val_loader = DataLoader(val_dataset, batch_size=64, shuffle=False)
 
-# Model loading and evaluation
-model = emoNet(num_of_channels=1, num_of_classes=len(train_data.classes))
+# Load the model and prepare for evaluation
+model = emoNet(num_of_channels=1, num_of_classes=len(label_mapping))
 model.load_state_dict(torch.load('/Users/markusbaumann/emotionrecognition/output/model.pth'))
 model.eval()
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model.to(device)
 
-# Model Evaluation on Validation Set
+# Evaluate the model on the validation set
 correct = 0
 total = 0
-
 with torch.no_grad():
     for images, labels in val_loader:
         images, labels = images.to(device), labels.to(device)
@@ -96,5 +89,6 @@ with torch.no_grad():
         total += labels.size(0)
         correct += (predicted == labels).sum().item()
 
+# Calculate and print accuracy
 accuracy = 100 * correct / total
 print(f'Validation Accuracy: {accuracy:.2f}%')

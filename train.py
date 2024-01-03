@@ -5,6 +5,7 @@ from torch.utils.data import WeightedRandomSampler
 from sklearn.metrics import classification_report
 from torchvision.transforms import RandomCrop
 from torchvision.transforms import Grayscale
+from torchvision.transforms import RandomApply
 from torchvision.transforms import ToTensor
 from torch.utils.data import random_split
 from torch.utils.data import DataLoader
@@ -25,6 +26,14 @@ import torch
 import math
 import torch
 import torch.optim as optim
+import matplotlib.pyplot as plt
+import seaborn as sns
+import pandas as pd
+import torch
+from datetime import datetime
+
+# your existing imports (e.g., for your model, data loader, etc.)
+
 
 
 
@@ -39,19 +48,22 @@ print(f"[INFO] Current training device: {device}")
 
 
 train_transform = transforms.Compose([
-    Grayscale(num_output_channels=1),
-    RandomHorizontalFlip(),
-    RandomRotation(10),
-    RandomCrop((48, 48)),
-    ToTensor(),
-    Normalize(mean=[0.512304961681366], std=[0.21182875335216522])
+    transforms.Grayscale(num_output_channels=1),
+    transforms.RandomHorizontalFlip(),
+    transforms.RandomRotation(10),
+    transforms.RandomCrop((48, 48)),
+    transforms.RandomApply([
+        transforms.GaussianBlur(kernel_size=(3, 3)),
+        transforms.ColorJitter(brightness=0.1, contrast=0.1)  # Adjust brightness and contrast
+    ], p=0.2),
+    transforms.ToTensor(),
+    Normalize(mean=[0.5071], std=[0.2370])
 ])
 
- 
 test_transform = transforms.Compose([
     Grayscale(num_output_channels=1),
     ToTensor(),
-    Normalize(mean=[0.512304961681366], std=[0.21182875335216522])
+    Normalize(mean=[0.5071], std=[0.2370])
 ])
  
 # load all the images within the specified folder and apply different augmentation
@@ -229,8 +241,9 @@ if device == "cuda":
     model = model.to("cpu")
 torch.save(model.state_dict(), args['model'])
  
+ 
 # plot the training loss and accuracy overtime
-plt.style.use("ggplot")
+plt.style.use("seaborn")
 plt.figure()
 plt.plot(history['train_acc'], label='train_acc')
 plt.plot(history['val_acc'], label='val_acc')
